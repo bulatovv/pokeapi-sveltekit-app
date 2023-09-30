@@ -20,6 +20,6 @@ export async function load() {
     }
 
     return {
-        pokemons: pokemons
+        pokemons: pokemons.sort((a, b) => a.name.localeCompare(b.name)),
     };
 }
