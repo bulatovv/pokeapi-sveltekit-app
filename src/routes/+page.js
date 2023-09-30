@@ -19,8 +19,6 @@ export async function load() {
         endpoint = chunk.next;
     }
 
-    console.log(pokemons);
-
     return {
         pokemons: pokemons
     };
