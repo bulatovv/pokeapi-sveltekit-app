@@ -1,25 +1,30 @@
+import { pokeapiGraphqlEndpoint } from '$lib/config/services';
+
 /** @type {import('./$types').PageLoad} */
-export async function load() {
-    const chunkSize = 400;
-    let endpoint = `https://pokeapi.co/api/v2/pokemon?limit=${chunkSize}`;
+export async function load({ url }) {
+    const search = (url.searchParams.get('search') || '') + '%';
 
-    const pokemons = [];
+    let request;
 
-    while (endpoint) {
-        const response = await fetch(endpoint);
-        const chunk = await response.json();
+    request = await fetch(pokeapiGraphqlEndpoint, {
+        method: 'POST',
+        body: JSON.stringify({
+            query: `
+                query($search: String!) {
+                    species: pokemon_v2_pokemonspecies(where: {name: {_ilike: $search}}) { 
+                        id,
+                        name,
+                    }
+                }
 
-        for (const pokemon of chunk.results) {
-            const id = pokemon.url.split('/').slice(-2)[0];
-            pokemon.id = id;
-        }
+            `,
+            variables: { search },
+        })
+    });
 
-        pokemons.push(...chunk.results);
-
-        endpoint = chunk.next;
-    }
+    const response = await request.json();
 
     return {
-        pokemons: pokemons.sort((a, b) => a.name.localeCompare(b.name)),
+        pokemons: response.data.species,
     };
 }
