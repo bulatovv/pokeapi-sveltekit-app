@@ -1,0 +1,3 @@
+<div class="inline-block bg-gray-100 rounded-lg p-2 m-1 shadow-md">
+    ...
+</div>

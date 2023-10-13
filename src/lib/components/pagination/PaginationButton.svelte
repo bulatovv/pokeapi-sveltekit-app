@@ -6,6 +6,7 @@
 </script>
 
 
+
 <input 
     type="radio" 
     name="page" 
@@ -15,7 +16,8 @@
     class="hidden" />
 <label
     for="page-{num}"
-    class="inline-block bg-gray-100 rounded-lg p-2 m-1 shadow-md cursor-pointer"
+    class="inline-block rounded-lg p-2 m-1 shadow-md cursor-pointer"
+    class:bg-gray-100={page != num}
     class:bg-blue-200={page == num}>
     {num}
 </label>

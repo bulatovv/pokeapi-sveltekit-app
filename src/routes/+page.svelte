@@ -3,25 +3,22 @@
     import { browser } from '$app/environment';
     import debounce from 'lodash.debounce';
     import PokemonCard from '$lib/components/PokemonCard.svelte';
-    import Pagination from '$lib/components/Pagination.svelte';
+    import Pagination from '$lib/components/pagination/Pagination.svelte';
 
     /** @type {import('./$types').PageData} */
 	export let data;
     
 
-    let page = data.page;
-    let search = data.search;
-
     const handleSearch = ({ target : { value } }) => {
-        search = value;
+        data.search = value;
     }
 
-    $: if (browser && (search || page)) {
+    $: if (browser && (data.search || data.page)) {
         const params = new URLSearchParams();
-        if (search) params.set('search', search);
-        if (page != 1) params.set('page', page);
+        if (data.search) params.set('search', data.search);
+        if (data.page != 1) params.set('page', data.page);
         
-        goto(`/?${params.toString()}`, { keepFocus: true, noScroll: true });
+        goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
     }
 
 </script>
@@ -32,7 +29,7 @@
         on:keyup={debounce(handleSearch, 500)}
         placeholder="Search..."
         class="rounded-lg bg-gray-100 p-4 m-4 shadow-md"
-        value={search}
+        value={data.search}
         />
 
     <div class="grid grid-cols-3 gap-1">
@@ -41,6 +38,7 @@
         {/each}
     </div>
 
-    <Pagination totalPages={data.totalPages} bind:page={page}/>
+
+    <Pagination totalPages={data.totalPages} bind:page={data.page} class="color-red-500" />
 
 </main>
