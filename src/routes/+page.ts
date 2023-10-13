@@ -1,15 +1,12 @@
 import { pokeapiGraphqlEndpoint } from '$lib/config/services';
+import type { PageLoad } from './$types';
 
-/** @type {import('./$types').PageLoad} */
-export async function load({ url }) {
+export const load: PageLoad = async ({ url }) => {
     const search = url.searchParams.get('search') || '';
     const page = parseInt(url.searchParams.get('page') || '1');
     const perPage = 12;
 
-
-    let request;
-
-    request = await fetch(pokeapiGraphqlEndpoint, {
+    const request = await fetch(pokeapiGraphqlEndpoint, {
         method: 'POST',
         body: JSON.stringify({
             query: `

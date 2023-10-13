@@ -1,14 +1,14 @@
-<script>
+<script lang="ts">
+    import type { PageData } from '$types';
+
     import { goto } from '$app/navigation';
     import { browser } from '$app/environment';
     import debounce from 'lodash.debounce';
     import PokemonCard from '$lib/components/PokemonCard.svelte';
     import Pagination from '$lib/components/pagination/Pagination.svelte';
 
-    /** @type {import('./$types').PageData} */
-	export let data;
-    
-
+	export let data: PageData;
+ 
     const handleSearch = ({ target : { value } }) => {
         data.search = value;
     }
