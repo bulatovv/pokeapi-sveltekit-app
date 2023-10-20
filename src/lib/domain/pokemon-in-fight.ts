@@ -8,12 +8,6 @@ export type NegativeAttackError = {
     tag: 'NegativeAttackError',
 };
 
-export class Pokemon {
-    constructor(
-        protected _id: number,
-    ) {}
-}
-
 export class PokemonInFight {
     constructor(
         protected _hp: number,
@@ -33,12 +27,14 @@ export class PokemonInFight {
                 error: { tag: 'NonPositiveMaxHpError' },
             };
         }
+
         if (attack < 0) {
             return {
                 success: false,
                 error: { tag: 'NegativeAttackError' },
             };
         }
+
         return {
             success: true,
             value: new PokemonInFight(maxHp, attack),
@@ -46,19 +42,23 @@ export class PokemonInFight {
 
     }
 
-    attack(another: PokemonInFight): void {
-        another.takeDamage(this._attack);
+    attack(another: PokemonInFight): 'defeated' | PokemonInFight {
+        return another.takeDamage(this.attack);
     }
 
-    protected takeDamage(damage: number): void {
-        this._hp = Math.max(0, this._hp - damage);
+    takeDamage(from: PokemonInFight): 'defeated' | PokemonInFight {
+        if (this.hp <= from.attack) {
+            return 'defeated'
+        }
+
+        return new PokemonInFight(this.hp - this.attack, this.attack);
+    }
+    
+    get hp() {
+        return _hp;
     }
 
-    get hp(): number {
-        return this._hp;
-    }
-
-    defeated(): boolean {
-        return this._hp === 0;
+    get attack() {
+        return _attack;
     }
 }
