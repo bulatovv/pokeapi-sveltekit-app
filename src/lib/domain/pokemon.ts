@@ -50,7 +50,7 @@ export class PokemonInFight {
         another.takeDamage(this._attack);
     }
 
-    takeDamage(damage: number): void {
+    protected takeDamage(damage: number): void {
         this._hp = Math.max(0, this._hp - damage);
     }
 
