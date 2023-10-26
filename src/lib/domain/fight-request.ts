@@ -6,19 +6,22 @@ export type FightRequestAlreadyAccepted = {
 
 export class FightRequest {
     constructor(
-        protected readonly attacker: number,
-        protected readonly attackerPokemon: number,
-        protected readonly defender: number, 
-        protected readonly accepted: boolean
+        protected readonly _id: string,
+        protected readonly _attacker: number,
+        protected readonly _attackerPokemon: number,
+        protected readonly _defender: number, 
+        protected _accepted: boolean
     ) {}
 
     static create(
+        id: string,
         attacker: number,
         attackerPokemon: number,
         defender: number,
         accepted: boolean = false,
     ): FightRequest {
         return new FightRequest(
+            id,
             attacker,
             attackerPokemon,
             defender,
@@ -27,13 +30,22 @@ export class FightRequest {
     }
 
     accept(): Result<void, FightRequestAlreadyAccepted> {
-        if (this.accepted) {
+        if (this._accepted) {
             return {
                 success: false,
-                tag: 'FightRequestAlreadyAccepted',
+                error: {tag: 'FightRequestAlreadyAccepted'},
             }
         }
 
-        this.accepted = true;
+        this._accepted = true;
+
+        return {
+            success: true,
+            value: undefined,
+        };
+    }
+
+    get id(): string {
+        return this._id;
     }
 }
