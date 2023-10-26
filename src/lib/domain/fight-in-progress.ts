@@ -1,40 +1,95 @@
-import type { Result } from './result'; 
-import { PokemonInFight } from './pokemon';
+import type { FightRound } from './fight-round';
+import type { Result } from './result';
+import type  { AppendOnlyList } from './append-only-list';
+import type { Stack } from './stack'
+import { Dice } from './dice'
+
+type Pair<T> = [T, T];
 
 
-export type FightAlreadyFinishedError = {
+type PlayerAlreadyRolledError = {
+    tag: 'PlayerAlreadyRolledError',
+}
+
+type FightAlreadyFinishedError = {
     tag: 'FightAlreadyFinishedError',
-};
-
+}
 
 export class FightInProgress {
+ 
     protected constructor(
-        protected readonly pokemons: PokemonInFight[2],
-        readonly finished: boolean = false,
+        protected readonly gameId: string,
+        protected readonly autoplay: Pair<boolean>,
+        protected readonly rounds: AppendOnlyList<FightRound | 'finished'>,
+        protected readonly rolls: Stack<Pair<Dice | null>>,
     ) {}
 
+    static create(
+        gameId: string,
+        autoplay: Pair<boolean>,
+        rounds: AppendOnlyList<FightRound | 'finished'>,
+        rolls: Stack<Pair<Dice | null>>,
+    ): FightInProgress {
+        const fight = new FightInProgress(gameId, autoplay, rounds, rolls);
 
-    static create(pokemons: PokemonInFight[2], finished: boolean): FightInProgress {
-        return new FightInProgress(pokemons, finished);
+        if (autoplay[0]) {
+            fight.progress(0);
+        }
+
+        return fight;
     }
 
 
-    attack(attacker: 0 | 1): Result<{ finished: boolean }, FightWrongTurnError> {
-        if (this._finished) {
-            return {
-                success: false,
-                tag: 'FightAlreadyFinishedError',
+    progress(turn: 0 | 1)
+        : Result<
+            void | 'finished', 
+            PlayerAlreadyRolledError | FightAlreadyFinishedError
+        > {
+
+        const lastRound = this.rounds.last();
+
+        if (lastRound === 'finished') {
+            return { success: false, error: { tag: 'FightAlreadyFinishedError' } };
+        }
+
+
+        const lastRoll = this.rolls.pop() ?? [null, null];
+
+        if (lastRoll[turn] !== null) {
+            return { success: false, error: { tag: 'PlayerAlreadyRolledError' } };
+        }
+
+
+        const dice = Dice.createAndRoll(1, 6);
+        lastRoll[turn] = dice;
+        this.rolls.push(lastRoll);
+
+
+        if (lastRoll[0] && lastRoll[1]) {
+            if (lastRoll[0].value % 2 == lastRoll[1].value % 2) {
+                this.rounds.append(lastRound.complete(0));
+            }
+            else {
+                this.rounds.append(lastRound.complete(1));
             }
         }
 
-        const defender = (attacker + 1) % 2;
-    
-        this.pokemons[attacker].attack(this.pokemons[defender])
 
-        if (this.pokemons[defendeer].defeated()) {
-            this._finished = true;
+        if (this.rounds.last() === 'finished') {
+            return { success: true, value: 'finished' };
+        }
+       
+
+
+        const nextTurn = turn == 0 ? 1 : 0;
+
+        if (this.autoplay[nextTurn]) {
+            return this.progress(nextTurn);
         }
 
-        return { success: true };
+        return { success: true, value: undefined };
+
     }
+
+
 }
