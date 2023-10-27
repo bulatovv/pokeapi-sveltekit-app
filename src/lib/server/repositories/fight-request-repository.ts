@@ -1,7 +1,4 @@
-import type { FightRequest } from '../domain/fight-request';
-
-// simple in-memory map
-
+import type { FightRequest } from '../models/fight-request';
 
 export class FightRequestRepository {
     private static data: Record<string, FightRequest>;
