@@ -75,7 +75,7 @@ export class SearchPokemonsByName {
         const response: GraphqlResponse = await request.json();
 
         const pokemons = response.data.species.map((pokemon) => {
-            const stats: {hp: number; attack: number} = {hp: 0, attack: 0};
+            const stats = {hp: 0, attack: 0};
             
             pokemon.pokemon_v2_pokemonstats.forEach((stat) => {
                 if (stat.pokemon_v2_stat.name === 'hp') {
