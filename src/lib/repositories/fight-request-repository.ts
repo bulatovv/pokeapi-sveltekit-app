@@ -15,9 +15,7 @@ export class FightRequestRepository {
 
     }
 
-
     delete(id: string): void {
         delete FightRequestRepository.data[id];
     }
-
 }
