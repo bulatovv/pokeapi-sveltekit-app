@@ -22,22 +22,20 @@
 
 </script>
 
-<main>
-    <input 
-        type="text"
-        on:keyup={debounce(handleSearch, 500)}
-        placeholder="Search..."
-        class="rounded-lg bg-gray-100 p-4 m-4 shadow-md"
-        value={data.search}
-        />
+<input 
+    type="text"
+    on:keyup={debounce(handleSearch, 500)}
+    placeholder="Search..."
+    class="rounded-lg bg-gray-100 py-2 px-4 m-4 shadow-md"
+    value={data.search}
+    />
 
-    <div class="grid grid-cols-3 gap-1">
-        {#each data.pokemons as pokemon (pokemon.id)}
-            <PokemonCard {pokemon} />
-        {/each}
-    </div>
+<div class="grid grid-cols-3">
+    {#each data.pokemons as pokemon (pokemon.id)}
+        <PokemonCard {pokemon} />
+    {/each}
+</div>
 
 
-    <Pagination totalPages={data.totalPages} bind:page={data.page} class="color-red-500" />
+<Pagination totalPages={data.totalPages} bind:page={data.page} class="flex justify-center color-red-500" />
 
-</main>
