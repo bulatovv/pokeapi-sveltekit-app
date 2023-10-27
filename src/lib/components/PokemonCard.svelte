@@ -26,7 +26,7 @@
                 <p class="text-lg font-semibold">{pokemon.stats.attack}</p>
             </div>
             
-            <a href="/pokemon/{pokemon.name}" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <a href="/pokemons/{pokemon.name}" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Details &rarr;
             </a>
         </div>
