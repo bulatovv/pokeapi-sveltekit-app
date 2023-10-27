@@ -1,10 +1,5 @@
 import { pokeapiGraphqlEndpoint } from '../config/services';
-
-type PokemonWithStats = {
-    id: number;
-    name: string;
-    stats: {hp: number; attack: number};
-};
+import type { PokemonWithStats } from '../dto/pokemon-with-stats';
 
 
 type PokemonsWithStatsPaginated = {
