@@ -1,6 +1,5 @@
 <script lang="ts">
-    import type { PageData } from '$types';
-
+    import type { PageData } from './$types';
     import { goto } from '$app/navigation';
     import { browser } from '$app/environment';
     import debounce from 'lodash.debounce';
@@ -8,15 +7,15 @@
     import Pagination from '$lib/components/pagination/Pagination.svelte';
 
 	export let data: PageData;
- 
-    const handleSearch = ({ target : { value } }) => {
-        data.search = value;
+
+    const handleSearch = (e: KeyboardEvent) => {
+        data.search = (e.target as HTMLInputElement).value;
     }
 
     $: if (browser && (data.search || data.page)) {
         const params = new URLSearchParams();
         if (data.search) params.set('search', data.search);
-        if (data.page != 1) params.set('page', data.page);
+        if (data.page != 1) params.set('page', data.page.toString());
         
         goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
     }
