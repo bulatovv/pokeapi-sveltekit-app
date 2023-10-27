@@ -10,6 +10,7 @@
 
     const handleSearch = (e: KeyboardEvent) => {
         data.search = (e.target as HTMLInputElement).value;
+        data.page = 1;
     }
 
     $: if (browser && (data.search || data.page)) {
