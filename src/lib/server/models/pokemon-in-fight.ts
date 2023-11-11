@@ -42,10 +42,6 @@ export class PokemonInFight {
 
     }
 
-    attack(another: PokemonInFight): 'defeated' | PokemonInFight {
-        return another.takeDamage(this.attack);
-    }
-
     takeDamage(from: PokemonInFight): 'defeated' | PokemonInFight {
         if (this.hp <= from.attack) {
             return 'defeated'
@@ -55,10 +51,10 @@ export class PokemonInFight {
     }
     
     get hp() {
-        return _hp;
+        return this._hp;
     }
 
     get attack() {
-        return _attack;
+        return this._attack;
     }
 }

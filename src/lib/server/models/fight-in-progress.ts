@@ -1,36 +1,51 @@
 import type { FightRound } from './fight-round';
 import type { Result } from './result';
-import type  { AppendOnlyList } from './append-only-list';
-import type { Stack } from './stack'
+import type { Pair } from './pair';
+import { AppendOnlyList } from './append-only-list';
+import { Stack } from './stack'
 import { Dice } from './dice'
 
-type Pair<T> = [T, T];
 
 
-type PlayerAlreadyRolledError = {
+export type PlayerAlreadyRolledError = {
     tag: 'PlayerAlreadyRolledError',
 }
 
-type FightAlreadyFinishedError = {
+export type FightAlreadyFinishedError = {
     tag: 'FightAlreadyFinishedError',
 }
 
+export type MoveNotProvidedError = {
+    tag: 'MoveNotProvidedError',
+}
+
+/*
+ * TODO: Encapslate all container operations (AppendOnlyList, Stack)
+ */
 export class FightInProgress {
  
     protected constructor(
-        protected readonly gameId: string,
-        protected readonly autoplay: Pair<boolean>,
-        protected readonly rounds: AppendOnlyList<FightRound | 'finished'>,
-        protected readonly rolls: Stack<Pair<Dice | null>>,
+        protected readonly _id: string,
+        protected readonly _autoplay: Pair<boolean>,
+        protected readonly _pokemons: Pair<number>,
+        protected readonly _rounds: AppendOnlyList<FightRound | 'finished'>,
+        protected readonly _rolls: Stack<Pair<number | null>>,
     ) {}
 
     static create(
-        gameId: string,
+        id: string,
         autoplay: Pair<boolean>,
-        rounds: AppendOnlyList<FightRound | 'finished'>,
-        rolls: Stack<Pair<Dice | null>>,
+        pokemons: Pair<number>,
+        rounds: Array<FightRound | 'finished'>,
+        rolls: Array<Pair<number | null>> = [],
     ): FightInProgress {
-        const fight = new FightInProgress(gameId, autoplay, rounds, rolls);
+        const fight = new FightInProgress(
+            id, 
+            autoplay, 
+            pokemons,
+            new AppendOnlyList(rounds), 
+            new Stack(rolls)
+        );
 
         if (autoplay[0]) {
             fight.progress(0);
@@ -39,43 +54,54 @@ export class FightInProgress {
         return fight;
     }
 
+    get id(): string {
+        return this._id;
+    }
 
-    progress(turn: 0 | 1)
+    progress(turn: 0 | 1, turnNumber: number | null = null)
         : Result<
             void | 'finished', 
-            PlayerAlreadyRolledError | FightAlreadyFinishedError
+            PlayerAlreadyRolledError | FightAlreadyFinishedError | MoveNotProvidedError
         > {
 
-        const lastRound = this.rounds.last();
+        const lastRound = this._rounds.last();
 
         if (lastRound === 'finished') {
             return { success: false, error: { tag: 'FightAlreadyFinishedError' } };
         }
 
-
-        const lastRoll = this.rolls.pop() ?? [null, null];
+        const lastRoll = this._rolls.pop() ?? [null, null];
 
         if (lastRoll[turn] !== null) {
             return { success: false, error: { tag: 'PlayerAlreadyRolledError' } };
         }
 
 
-        const dice = Dice.createAndRoll(1, 6);
-        lastRoll[turn] = dice;
-        this.rolls.push(lastRoll);
+        if (!this._autoplay[turn] && turnNumber === null) {
+            return { success: false, error: { tag: 'MoveNotProvidedError' } };
+        }
 
 
-        if (lastRoll[0] && lastRoll[1]) {
-            if (lastRoll[0].value % 2 == lastRoll[1].value % 2) {
-                this.rounds.append(lastRound.complete(0));
+        if (turnNumber === null) {
+            const dice = Dice.createAndRoll(1, 6);
+            turnNumber = dice.value;
+        }
+        
+        lastRoll[turn] = turnNumber;
+        this._rolls.push(lastRoll);
+
+
+        if (lastRoll[0] !== null && lastRoll[1] !== null) {
+            if (lastRoll[0] % 2 == lastRoll[1] % 2) {
+                this._rounds.append(lastRound.complete(0));
             }
             else {
-                this.rounds.append(lastRound.complete(1));
+                this._rounds.append(lastRound.complete(1));
             }
         }
 
 
-        if (this.rounds.last() === 'finished') {
+        if (this._rounds.last() === 'finished') {
             return { success: true, value: 'finished' };
         }
        
@@ -83,13 +109,13 @@ export class FightInProgress {
 
         const nextTurn = turn == 0 ? 1 : 0;
 
-        if (this.autoplay[nextTurn]) {
+        if (this._autoplay[nextTurn]) {
             return this.progress(nextTurn);
         }
 
         return { success: true, value: undefined };
 
     }
-
-
+    
+    
 }

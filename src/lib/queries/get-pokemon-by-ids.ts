@@ -1,19 +1,19 @@
 import { pokeapiGraphqlEndpoint } from '../config/services';
 import type { PokemonWithStats } from '../dto/pokemon-with-stats';
 
-
-export class GetPokemonById {
+export class GetPokemonByIds {
+    
     constructor(
-        protected readonly id: number
+        protected readonly id: number[]
     ) {};
 
-    async execute(): Promise<PokemonWithStats> {
+    async execute(): Promise<PokemonWithStats[]> {
         const request = await fetch(pokeapiGraphqlEndpoint, {
             method: 'POST',
             body: JSON.stringify({
                 query: `
-                    query($id: Int!) {
-                        pokemon: pokemon_v2_pokemon(where: {id: {_eq: $id}}) {
+                    query($ids: [Int!]) {
+                        pokemon: pokemon_v2_pokemon(where: {id: {_in: $ids}}) {
                             id,
                             name,
                             pokemon_v2_pokemonstats(where: {pokemon_v2_stat: {name: {_in: ["hp", "attack"]}}}) {
@@ -25,7 +25,7 @@ export class GetPokemonById {
                         }
                     }
                 `,
-                variables: { id: this.id }
+                variables: { ids: this.id }
             })
         });
 
@@ -44,25 +44,25 @@ export class GetPokemonById {
             }
         };
 
-
         const response: GraphqlResponse = await request.json();
 
         const stats =  {hp: 0, attack: 0};
-            
-        response.data.pokemon[0].pokemon_v2_pokemonstats.forEach(stat => {
-            if (stat.pokemon_v2_stat.name === 'hp') {
-                stats.hp = stat.base_stat;
-            }
-            if (stat.pokemon_v2_stat.name === 'attack') {
-                stats.attack = stat.base_stat;
-            }
+
+        return response.data.pokemon.map(pokemon => {
+            pokemon.pokemon_v2_pokemonstats.forEach(stat => {
+                if (stat.pokemon_v2_stat.name === 'hp') {
+                    stats.hp = stat.base_stat;
+                }
+                if (stat.pokemon_v2_stat.name === 'attack') {
+                    stats.attack = stat.base_stat;
+                }
+            });
+            return {
+                id: pokemon.id,
+                name: pokemon.name,
+                stats: stats,
+            };
         });
-        
-        return {
-            id: response.data.pokemon[0].id,
-            name: response.data.pokemon[0].name,
-            stats: stats
-        };
+
     }
 }
- 
