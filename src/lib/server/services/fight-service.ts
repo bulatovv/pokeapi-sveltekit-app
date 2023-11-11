@@ -3,10 +3,9 @@ import type { PokemonWithStats } from '../../dto/pokemon-with-stats';
 import { FightInProgress } from '../models/fight-in-progress';
 import { FightRound } from '../models/fight-round';
 import { PokemonInFight } from '../models/pokemon-in-fight';
-import type { NonPositiveMaxHpError, NegativeAttackError } from '../models/pokemon-in-fight';
+import type { NegativeMaxHpError, NegativeAttackError } from '../models/pokemon-in-fight';
 import type { 
     PlayerAlreadyRolledError, 
-    FightAlreadyFinishedError,
     MoveNotProvidedError
 } from '../models/fight-in-progress';
 import type { Result } from '../models/result';
@@ -27,9 +26,9 @@ export class FightService {
 
     async start(
         pokemons: Pair<number>, 
-        autoplay: boolean
+        autoplay: Pair<boolean>
     ): Promise<
-        Result<void, NonPositiveMaxHpError | NegativeAttackError> 
+        Result<void, NegativeMaxHpError | NegativeAttackError> 
     > {
         const pokemonsWithStats: PokemonWithStats[] = await (new GetPokemonByIds(pokemons)).execute();
        
@@ -46,18 +45,19 @@ export class FightService {
             pokemonsWithStats[1].stats.hp,
             pokemonsWithStats[1].stats.attack,
         );
+
         if (!secondPokemon.success) {
             return secondPokemon;
         }
 
-        const initialRound = FightRound.create([firstPokemon.value, secondPokemon.value]);
 
+        const initialRound = FightRound.create([firstPokemon.value, secondPokemon.value]);
 
         const id = 'current';
         
         const fight = FightInProgress.create(
             id, 
-            [autoplay, true],
+            autoplay,
             pokemons,
             [initialRound],
         );
@@ -70,9 +70,8 @@ export class FightService {
     async progress(gameId: string, turn: 0 = 0, turnNumber: number)
         : Promise<
             Result<
-                void | 'finished', 
+                void, 
                 | PlayerAlreadyRolledError 
-                | FightAlreadyFinishedError 
                 | FightInProgressNotFoundError
                 | MoveNotProvidedError 
             >

@@ -17,13 +17,12 @@ export const actions = {
         const firstPokemon = parseInt(data.get('pokemon') as string);
 
 
-
         const secondPokemon = (
             await (new GetRandomPokemon()).execute() as PokemonWithStats
         ).id;
 
         await fightInProgressService.start([firstPokemon, secondPokemon], [true, true]);
 
-        throw redirect(302, '/');
+        throw redirect(303, '/');
 	},
 } satisfies Actions;

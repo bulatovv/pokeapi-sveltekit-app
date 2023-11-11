@@ -1,7 +1,7 @@
 import type { Result } from './result';
 
-export type NonPositiveMaxHpError = {
-    tag: 'NonPositiveMaxHpError',
+export type NegativeMaxHpError = {
+    tag: 'NegativeMaxHpError',
 };
 
 export type NegativeAttackError = {
@@ -19,12 +19,12 @@ export class PokemonInFight {
         attack: number
     ): Result<
         PokemonInFight,
-        NonPositiveMaxHpError | NegativeAttackError
+        NegativeMaxHpError | NegativeAttackError
     > {
         if (maxHp <= 0) {
             return {
                 success: false,
-                error: { tag: 'NonPositiveMaxHpError' },
+                error: { tag: 'NegativeMaxHpError' },
             };
         }
 
@@ -42,14 +42,16 @@ export class PokemonInFight {
 
     }
 
-    takeDamage(from: PokemonInFight): 'defeated' | PokemonInFight {
-        if (this.hp <= from.attack) {
-            return 'defeated'
-        }
+    takeDamage(from: PokemonInFight): PokemonInFight {
+        const hp = Math.max(0, this._hp - from.attack);
 
-        return new PokemonInFight(this.hp - this.attack, this.attack);
+        return new PokemonInFight(hp, this._attack);
     }
-    
+   
+    defeated(): boolean {
+        return this._hp == 0;
+    }
+
     get hp() {
         return this._hp;
     }
