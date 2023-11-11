@@ -4,7 +4,7 @@ import type { PokemonWithStats } from '../dto/pokemon-with-stats';
 export class GetPokemonByIds {
     
     constructor(
-        protected readonly id: number[]
+        protected readonly ids: number[]
     ) {};
 
     async execute(): Promise<PokemonWithStats[]> {
@@ -13,7 +13,7 @@ export class GetPokemonByIds {
             body: JSON.stringify({
                 query: `
                     query($ids: [Int!]) {
-                        pokemon: pokemon_v2_pokemon(where: {id: {_in: $ids}}) {
+                        pokemons: pokemon_v2_pokemon(where: {id: {_in: $ids}}) {
                             id,
                             name,
                             pokemon_v2_pokemonstats(where: {pokemon_v2_stat: {name: {_in: ["hp", "attack"]}}}) {
@@ -25,13 +25,13 @@ export class GetPokemonByIds {
                         }
                     }
                 `,
-                variables: { ids: this.id }
+                variables: { ids: this.ids }
             })
         });
 
         type GraphqlResponse = {
             data: {
-                pokemon: {
+                pokemons: {
                     id: number;
                     name: string;
                     pokemon_v2_pokemonstats: {
@@ -46,9 +46,9 @@ export class GetPokemonByIds {
 
         const response: GraphqlResponse = await request.json();
 
-        const stats =  {hp: 0, attack: 0};
 
-        return response.data.pokemon.map(pokemon => {
+        return response.data.pokemons.map(pokemon => {
+            const stats =  {hp: 0, attack: 0};
             pokemon.pokemon_v2_pokemonstats.forEach(stat => {
                 if (stat.pokemon_v2_stat.name === 'hp') {
                     stats.hp = stat.base_stat;
