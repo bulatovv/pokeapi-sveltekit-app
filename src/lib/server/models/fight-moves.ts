@@ -62,7 +62,7 @@ export class FightMoves {
     }
 
     winner(): 0 | 1 | null {
-        let lastMove = this.moves.slice(-1)[0];
+        const lastMove = this.moves.slice(-1)[0];
         
         if (lastMove[0] === null || lastMove[1] === null) {
             return null;
@@ -74,6 +74,10 @@ export class FightMoves {
         else {
             return 1;
         }
+    }
+    
+    get values(): Array<Pair<number | null>> {
+        return this.moves;
     }
 
 }

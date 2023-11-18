@@ -2,10 +2,13 @@
 type Pair<T> = [T, T];
 
 export type FightInProgressDTO = {
+    id: string,
     pokemons: Pair<{
+        id: number,
         name: string,
+        attack: number,
         currentHp: number,
-        attack: number
-    }>
-    turns: Pair<number|null>
+    }>,
+    move: Pair<number|null>,
+    winner: 0 | 1 | null,
 }

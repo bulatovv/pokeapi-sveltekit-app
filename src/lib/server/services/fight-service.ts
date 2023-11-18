@@ -24,15 +24,14 @@ export class FightService {
     ) {}
 
 
-    async start(
+    protected async createGame(
         pokemons: Pair<number>, 
         autoplay: Pair<boolean>
     ): Promise<
-        Result<void, NegativeMaxHpError | NegativeAttackError> 
+        Result<FightInProgress, NegativeMaxHpError | NegativeAttackError>
     > {
         const pokemonsWithStats: PokemonWithStats[] = await (new GetPokemonByIds(pokemons)).execute();
        
-
         const firstPokemon = PokemonInFight.create(
             pokemonsWithStats[0].stats.hp,
             pokemonsWithStats[0].stats.attack,
@@ -55,39 +54,68 @@ export class FightService {
 
         const id = 'current';
         
-        const fight = FightInProgress.create(
-            id, 
-            autoplay,
-            pokemons,
-            [initialRound],
-        );
+        return {
+            success: true,
+            value: FightInProgress.create(id, autoplay, pokemons, [initialRound])
+        };
+    }
 
-        await this.fightInProgressRepository.save(fight);
+
+    async start(
+        pokemons: Pair<number>, 
+        autoplay: Pair<boolean>
+    ): Promise<
+        Result<void, NegativeMaxHpError | NegativeAttackError> 
+    > {
+        const fight = await this.createGame(pokemons, autoplay);
+        if (!fight.success) {
+            return fight;
+        }
+
+        await this.fightInProgressRepository.save(fight.value);
 
         return { success: true, value: undefined };
     }
 
-    async progress(gameId: string, turn: 0 = 0, turnNumber: number)
-        : Promise<
-            Result<
-                void, 
-                | PlayerAlreadyRolledError 
-                | FightInProgressNotFoundError
-                | MoveNotProvidedError 
-            >
-        > {
-            const fight = await this.fightInProgressRepository.get(gameId);
+    async progress(
+        gameId: string,
+        turn: 0 = 0, 
+        turnNumber: number
+    ): Promise<
+        Result<
+            void, 
+            | PlayerAlreadyRolledError 
+            | FightInProgressNotFoundError
+            | MoveNotProvidedError 
+        >
+    > {
+        const fight = await this.fightInProgressRepository.get(gameId);
 
-            if (fight === null) {
-                return { success: false, error: { tag: 'FightInProgressNotFoundError' } };
-            }
+        if (fight === null) {
+            return { success: false, error: { tag: 'FightInProgressNotFoundError' } };
+        }
 
-            const result = fight.progress(turn, turnNumber);
-            
-            if (result.success) {
-                await this.fightInProgressRepository.save(fight);
-            }
+        const result = fight.progress(turn, turnNumber);
+        
+        if (result.success) {
+            await this.fightInProgressRepository.save(fight);
+        }
 
-            return result;
+        return result;
+    }
+
+    async quick(pokemons: Pair<number>): Promise<
+        Result<
+            void, 
+            | NegativeMaxHpError 
+            | NegativeAttackError
+        >
+    > {
+        const fight = await this.createGame(pokemons, [true, true]);
+        if (!fight.success) {
+            return fight;
+        }
+        
+        return { success: true, value: undefined };
     }
 }

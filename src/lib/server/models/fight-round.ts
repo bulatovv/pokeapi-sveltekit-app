@@ -2,7 +2,7 @@ import type { PokemonInFight } from './pokemon-in-fight';
 
 export class FightRound {
     protected constructor(
-        protected readonly pokemons: [PokemonInFight, PokemonInFight]
+        protected readonly _pokemons: [PokemonInFight, PokemonInFight]
     ) {}
 
 
@@ -14,25 +14,29 @@ export class FightRound {
     win(attacker: 0 | 1): FightRound {
         const defender = (attacker + 1) % 2;
    
-        const attackerPokemon = this.pokemons[attacker];
-        const defenderPokemon = this.pokemons[defender].takeDamage(attackerPokemon);
+        const attackerPokemon = this._pokemons[attacker];
+        const defenderPokemon = this._pokemons[defender].takeDamage(attackerPokemon);
 
         return new FightRound([attackerPokemon, defenderPokemon]);
     }
 
     finished(): boolean {
-        return this.pokemons[0].defeated() || this.pokemons[1].defeated();
+        return this._pokemons[0].defeated() || this._pokemons[1].defeated();
     }
 
     winner(): 0 | 1 | null {
-        if (this.pokemons[0].defeated()) {
+        if (this._pokemons[0].defeated()) {
             return 1;
         }
 
-        if (this.pokemons[1].defeated()) {
+        if (this._pokemons[1].defeated()) {
             return 0;
         }
 
         return null;
     }
-}
+
+    get pokemons(): [PokemonInFight, PokemonInFight] {
+        return this._pokemons;
+    }
+}  

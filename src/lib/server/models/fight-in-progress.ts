@@ -50,6 +50,22 @@ export class FightInProgress {
         return this._id;
     }
 
+    get pokemons(): Pair<number> {
+        return this._pokemons;
+    }
+
+    get rounds(): FightRounds {
+        return this._rounds;
+    }
+
+    get moves(): FightMoves {
+        return this._moves;
+    }
+
+    get winner(): 0 | 1 | null {
+        return this._rounds.winner();
+    }
+
     progress(turn: 0 | 1, turnNumber: number | null = null)
         : Result<
             void,
@@ -88,5 +104,5 @@ export class FightInProgress {
     finished(): boolean {
         return this._rounds.finished();
     }
-    
+
 }

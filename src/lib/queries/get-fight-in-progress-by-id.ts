@@ -1,12 +1,25 @@
-import { pokeapiGraphqlEndpoint } from '../config/services';
 import type { FightInProgressDTO } from '../dto/fight-in-progress';
 
+
 export class GetFightInProgressById {
+    constructor(
+        protected readonly _id: string
+    ) {}
 
-    async execute() {
-        const request = await fetch('/fight');
+
+    async execute(fetch): Promise<FightInProgressDTO | null> {
         
-        body: 
 
+        const request = await fetch(`/fight?id=${this._id}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (request.status === 404) {
+            return null;
+        }
+
+        return await request.json() as FightInProgressDTO;
     }
 }
