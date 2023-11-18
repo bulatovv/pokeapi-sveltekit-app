@@ -21,6 +21,10 @@
         &larr; Back
     </a>
 
+    <div class="flex flex-row items-center justify-end text-lg font-semibold">
+        Pick this pokemon for:
+    </div>
+
     <form method="POST" action="/fight/fast" class="ml-4">
         <input type="hidden" name="pokemon" value="{data.pokemon.id}" />
         <button type="submit" class="ml-4 bg-red-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
